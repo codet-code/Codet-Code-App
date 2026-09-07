@@ -40,56 +40,56 @@
             </div>
         </div>
     </div>
+<script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const installModal = document.getElementById('installModal');
+    const confirmModalBtn = document.getElementById('confirmModalBtn');
+    const cancelModalBtn = document.getElementById('cancelModalBtn');
 
-    <script>
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-        const closeBtn = document.getElementById('closeBtn');
-        const installModal = document.getElementById('installModal');
-        const confirmModalBtn = document.getElementById('confirmModalBtn');
-        const cancelModalBtn = document.getElementById('cancelModalBtn');
+    // Show close button if already installed
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        closeBtn.style.display = 'inline-block';
+        installBtn.style.display = 'none'; // Hide install button if already installed
+    }
 
-        // Check if the app is ALREADY running inside its standalone window context
-        if (window.matchMedia('(display-mode: standalone)').matches) {
-            closeBtn.style.display = 'inline-block'; // Show a custom app close button
-        }
+    // Capture the install prompt if the system triggers it
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
 
-        // Listen for the browser's install evaluation
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault(); // Prevent standard browser mini-infobar from prompting automatically
-            deferredPrompt = e; // Store the trigger sequence
-            installBtn.style.display = 'inline-block'; // Reveal your stylized website install button
-        });
+    // Make your custom modal open when clicking the button
+    installBtn.addEventListener('click', () => {
+        installModal.style.display = 'flex';
+    });
 
-        // Trigger custom modal window when web button is clicked
-        installBtn.addEventListener('click', () => {
-            installModal.style.display = 'flex';
-        });
+    cancelModalBtn.addEventListener('click', () => {
+        installModal.style.display = 'none';
+    });
 
-        // If user clicks cancel inside the dialog
-        cancelModalBtn.addEventListener('click', () => {
-            installModal.style.display = 'none';
-        });
-
-        // If user confirms the install inside your popup window
-        confirmModalBtn.addEventListener('click', async () => {
-            installModal.style.display = 'none'; 
-            if (!deferredPrompt) return;
-            
-            deferredPrompt.prompt(); // Call native system browser confirmation dialogue
+    confirmModalBtn.addEventListener('click', async () => {
+        installModal.style.display = 'none';
+        
+        if (deferredPrompt) {
+            // Modern native install
+            deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            
-            if (outcome === 'accepted') {
-                console.log('User accepted installation');
-                installBtn.style.display = 'none'; // hide the button since it's now an app
-            }
+            if (outcome === 'accepted') installBtn.style.display = 'none';
             deferredPrompt = null;
-        });
-
-        // Register the Service Worker required for offline operational capability
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+        } else {
+            // BACKUP METHOD: If ChromeOS blocks the script, we give the user manual instructions!
+            alert("To install this app on your Chromebook:\n\n1. Look at the top right of your browser's address bar.\n2. Click the small laptop icon with the down arrow (or click the three vertical dots menu and select 'Install App').");
         }
-    </script>
+    });
+
+    // Register Service Worker securely
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log("SW Registered!"))
+        .catch(err => console.log("SW Error", err));
+    }
+</script>
 </body>
 </html>

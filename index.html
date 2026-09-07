@@ -3,93 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>(Beta) Codet Code App</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Codet Code</title>
     <style>
-        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #121214; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .card { background: #202024; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); max-width: 400px; }
-        h1 { color: #4ade80; margin-top: 0; }
-        button { background: #4ade80; color: #121214; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; margin-top: 15px; }
-        button:hover { background: #22c55e; }
-        
-        /* Pop-up Install Confirmation Modal styling */
-        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; }
-        .modal { background: #2a2a30; padding: 24px; border-radius: 8px; width: 300px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
-        .modal-buttons { display: flex; justify-content: space-around; margin-top: 20px; }
-        .btn-confirm { background: #4ade80; color: #121214; }
-        .btn-cancel { background: #a1a1aa; color: #121214; }
+        :root { --bg-color: #121214; --card-color: #202024; --primary-color: #4ade80; --text-color: #ffffff; }
+        body { font-family: system-ui, sans-serif; background: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .container { background: var(--card-color); padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.5); width: 100%; max-width: 400px; box-sizing: border-box; }
+        h1 { margin-top: 0; color: var(--primary-color); }
+        p { color: #a1a1aa; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #a1a1aa; }
+        input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #3f3f46; background: #18181b; color: white; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: var(--primary-color); outline: none; }
+        button { background: var(--primary-color); color: #121214; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; width: 100%; margin-top: 10px; }
+        button:hover { filter: brightness(1.1); }
+        .btn-secondary { background: #3f3f46; color: white; margin-top: 10px; }
+        .btn-danger { background: #ef4444; color: white; margin-top: 15px; }
+        .msg-box { font-size: 14px; margin-top: 12px; font-weight: bold; display: none; }
+        .dashboard { display: none; max-width: 600px; width: 90%; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-card { background: #27272a; padding: 15px; border-radius: 8px; text-align: left; border-left: 4px solid var(--primary-color); }
+        .stat-card h3 { margin: 0; font-size: 14px; color: #a1a1aa; }
+        .stat-card p { margin: 5px 0 0 0; font-size: 24px; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1>Codet Code App (Beta) </h1>
-        <p>Click below to open the install confirmation pop-up and add this app to your launcher (Please note that this is very much in beta, so please expect some bugs!).</p>
-        <button id="installBtn">Install App</button>
-        <button id="closeBtn" onclick="window.close()" style="display: none; background: #ef4444; color: white;">Close Application</button>
-    </div>
-
-    <!-- Custom Pop-up Install Confirmation Modal -->
-    <div id="installModal" class="modal-overlay">
-        <div class="modal">
-            <h3>Install Codet Code?</h3>
-            <p>Would you like to add this application to your device?</p>
-            <div class="modal-buttons">
-                <button class="btn-cancel" id="cancelModalBtn">No and Cancel</button>
-                <button class="btn-confirm" id="confirmModalBtn">Yes and Install</button>
-            </div>
-        </div>
-    </div>
-<script>
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    const closeBtn = document.getElementById('closeBtn');
-    const installModal = document.getElementById('installModal');
-    const confirmModalBtn = document.getElementById('confirmModalBtn');
-    const cancelModalBtn = document.getElementById('cancelModalBtn');
-
-    // Show close button if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-        closeBtn.style.display = 'inline-block';
-        installBtn.style.display = 'none'; // Hide install button if already installed
-    }
-
-    // Capture the install prompt if the system triggers it
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-    });
-
-    // Make your custom modal open when clicking the button
-    installBtn.addEventListener('click', () => {
-        installModal.style.display = 'flex';
-    });
-
-    cancelModalBtn.addEventListener('click', () => {
-        installModal.style.display = 'none';
-    });
-
-    confirmModalBtn.addEventListener('click', async () => {
-        installModal.style.display = 'none';
+    <!-- LOGIN & REGISTRATION SCREEN -->
+    <div id="loginScreen" class="container">
+        <h1>Codet Code Access Checkpoint</h1>
+        <p>Sign in or create an account to continue</p>
         
-        if (deferredPrompt) {
-            // Modern native install
-            deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') installBtn.style.display = 'none';
-            deferredPrompt = null;
-        } else {
-            // BACKUP METHOD: If ChromeOS blocks the script, we give the user manual instructions!
-            alert("To install this app on your Chromebook:\n\n1. Look at the top right of your browser's address bar.\n2. Click the small laptop icon with the down arrow (or click the three vertical dots menu and select 'Install App').");
-        }
-    });
+        <div class="form-group">
+            <label>Username:</label>
+            <input type="text" id="username" placeholder="Choose username...">
+        </div>
+        <div class="form-group">
+            <label>Password:</label>
+            <input type="password" id="password" placeholder="Enter password...">
+        </div>
+        
+        <button onclick="apiCall('login')">Sign In</button>
+        <button onclick="apiCall('register')" class="btn-secondary">Create Account</button>
+        
+        <div id="statusMessage" class="msg-box"></div>
+        <button onclick="window.close()" class="btn-secondary" style="background: #ef4444; margin-top: 20px;">Close Application</button>
+    </div>
 
-    // Register Service Worker securely
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js')
-        .then(reg => console.log("SW Registered!"))
-        .catch(err => console.log("SW Error", err));
-    }
-</script>
+    <!-- ADMIN DASHBOARD PANEL -->
+    <div id="adminDashboard" class="container dashboard">
+        <h1>Admin Control Panel</h1>
+        <p>Logged in as <span id="adminName" style="color: #4ade80;"></span></p>
+        <div class="grid">
+            <div class="stat-card" style="--primary-color: #f59e0b;"><h3>Permissions</h3><p>Full Root</p></div>
+            <div class="stat-card" style="--primary-color: #ef4444;"><h3>Server Status</h3><p>Active</p></div>
+        </div>
+        <button onclick="handleLogout()" class="btn-secondary">Log Out</button>
+        <button onclick="apiCall('delete')" class="btn-danger">Delete This Account Forever</button>
+    </div>
+
+    <!-- STANDARD USER DASHBOARD PANEL -->
+    <div id="userDashboard" class="container dashboard">
+        <h1><span id="userName" style="color: #60a5fa;">'s workspace.</span></h1>
+        <p>Welcome back to your workspace, <span id="userName" style="color: #60a5fa;"></span>!</p>
+        <div class="grid">
+            <div class="stat-card" style="--primary-color: #60a5fa;"><h3>Account Class</h3><p>Standard</p></div>
+            <div class="stat-card" style="--primary-color: #a855f7;"><h3>Cloud Cache</h3><p>Synchronized</p></div>
+        </div>
+        <button onclick="handleLogout()" class="btn-secondary">Log Out</button>
+        <button onclick="apiCall('delete')" class="btn-danger">Delete My Account</button>
+    </div>
+
+    <script>
+        // PASTE YOUR PERSONAL GOOGLE SCRIPT DEPLOYMENT LINK HERE!
+        const GOOGLE_API_URL = "https://script.google.com/macros/s/AKfycbw43OYb1MhEe3BX307Ew9kxO2hDT2XjHRMykWpNPhzuRKZvN2esy4fecchCTb2hNDRDWQ/exec";
+
+        async function apiCall(actionType) {
+            const userField = document.getElementById('username').value;
+            const passField = document.getElementById('password').value;
+
+            if(!userField || !passField) {
+                showMsg("Please fill out both entry boxes!", "#f87171");
+                return;
+            }
+
+            showMsg("Connecting to database cloud...", "#60a5fa");
+
+            try {
+                await fetch(GOOGLE_API_URL, {
+                    method: "POST",
+                    mode: "no-cors", 
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: actionType, username: userField, password: passField })
+                });
+
+                if(actionType === "register") {
+                    showMsg("Registration submitted! Open your personal Google Sheet to verify, then Log In.", "#4ade80");
+                } 
+                else if (actionType === "login") {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('statusMessage').style.display = 'none';
+                    
+                    if(userField.toLowerCase().trim() === 'admin') {
+                        document.getElementById('adminName').innerText = userField;
+                        document.getElementById('adminDashboard').style.display = 'block';
+                    } else {
+                        document.getElementById('userName').innerText = userField;
+                        document.getElementById('userDashboard').style.display = 'block';
+                    }
+                }
+                else if (actionType === "delete") {
+                    alert("Account delete signal successfully dispatched to Google Sheets backend!");
+                    handleLogout();
+                }
+
+            } catch (err) {
+                showMsg("Database transmission failure.", "#f87171");
+                console.error(err);
+            }
+        }
+
+        function showMsg(text, color) {
+            const msgBox = document.getElementById('statusMessage');
+            msgBox.innerText = text;
+            msgBox.style.color = color;
+            msgBox.style.display = 'block';
+        }
+
+        function handleLogout() {
+            document.getElementById('adminDashboard').style.display = 'none';
+            document.getElementById('userDashboard').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('loginScreen').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
